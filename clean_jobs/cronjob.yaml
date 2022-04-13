@@ -1,0 +1,17 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: jobs-cleanup
+spec:
+  schedule: "*/30 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: devops-bot
+          containers:
+          - name: kubectl-container
+            image: bitnami/kubectl:latest
+            # I'm using bitnami kubectl, because the suggested kubectl image didn't had the `field-selector` option
+            command: ["sh", "-c", "kubectl delete jobs --field-selector status.successful=1"]
+          restartPolicy: Never

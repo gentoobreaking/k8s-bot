@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    appname: image-cleanup
+    env: stage
+  name: image-cleanup
+  namespace: default
+spec:
+  minReadySeconds: 20
+  replicas: 1
+  selector:
+    matchLabels:
+      appname: image-cleanup
+      env: stage
+  template:
+    metadata:
+      labels:
+        appname: image-cleanup
+        env: stage
+    spec:
+      serviceAccount: default
+      serviceAccountName: default
+      containers:
+        - env:
+            - name: timestemp
+              value: Timestemp20200601071553
+          image: docker.io/alpine:3.13
+          securityContext:
+            privileged: true
+          command: ["nsenter"]
+          #args: ["-t", "1", "-m", "-u", "-i", "-n", "sleep", "14000"]
+          #args: ["-t", "1", "-m", "-u", "-i", "-n", "ip", "route"]
+          #args: ["-t", "1", "-m", "-u", "-i", "-n", "docker", "ps"]
+          #args: ["-t", "1", "-m", "-u", "-i", "-n", "docker", "image",  "prune", "--force"]
+          args: ["-t", "1", "-m", "-u", "-i", "-n", "--", "docker", "image",  "prune", "--force"]
+          imagePullPolicy: Always
+          name: node-shell
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: true
+      hostIPC: true
+      hostNetwork: true
+      hostPID: true
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 5
